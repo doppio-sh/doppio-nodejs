@@ -20,7 +20,6 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var _Doppio_apiKey, _Doppio_doppioConfig, _Doppio_launchConfig;
-import { DoppioError } from './doppioError';
 export class Doppio {
     constructor(apiKey) {
         _Doppio_apiKey.set(this, void 0);
@@ -315,3 +314,9 @@ export class Doppio {
     }
 }
 _Doppio_apiKey = new WeakMap(), _Doppio_doppioConfig = new WeakMap(), _Doppio_launchConfig = new WeakMap();
+export class DoppioError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'DoppioError';
+    }
+}

@@ -21,15 +21,14 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 var _Doppio_apiKey, _Doppio_doppioConfig, _Doppio_launchConfig;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Doppio = void 0;
-const doppioError_1 = require("./doppioError");
+exports.DoppioError = exports.Doppio = void 0;
 class Doppio {
     constructor(apiKey) {
         _Doppio_apiKey.set(this, void 0);
         _Doppio_doppioConfig.set(this, void 0);
         _Doppio_launchConfig.set(this, void 0);
         if (!apiKey) {
-            throw new doppioError_1.DoppioError('You must set your Doppio.sh API key');
+            throw new DoppioError('You must set your Doppio.sh API key');
         }
         __classPrivateFieldSet(this, _Doppio_apiKey, apiKey, "f");
         __classPrivateFieldSet(this, _Doppio_doppioConfig, null, "f");
@@ -54,13 +53,13 @@ class Doppio {
     renderPdfDirect(PagePdfConfigObject) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!PagePdfConfigObject) {
-                throw new doppioError_1.DoppioError('PagePdfConfigObject must be defined.');
+                throw new DoppioError('PagePdfConfigObject must be defined.');
             }
             if (PagePdfConfigObject.setContent && PagePdfConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You cannot use setContent and goto at the same time.');
+                throw new DoppioError('You cannot use setContent and goto at the same time.');
             }
             if (!PagePdfConfigObject.setContent && !PagePdfConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You need to set setContent or goto');
+                throw new DoppioError('You need to set setContent or goto');
             }
             const response = yield fetch('https://api.doppio.sh/v1/render/pdf/direct', {
                 method: 'POST',
@@ -73,10 +72,10 @@ class Doppio {
             });
             if (response.status === 400) {
                 const errorBody = yield response.json();
-                throw new doppioError_1.DoppioError(`${errorBody.message}`);
+                throw new DoppioError(`${errorBody.message}`);
             }
             if (!response.ok) {
-                throw new doppioError_1.DoppioError(`HTTP error! status: ${response.status}`);
+                throw new DoppioError(`HTTP error! status: ${response.status}`);
             }
             const buffer = yield response.arrayBuffer();
             return buffer;
@@ -85,15 +84,15 @@ class Doppio {
     renderScreenshotDirect(PageScreenshotConfigObject) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!PageScreenshotConfigObject) {
-                throw new doppioError_1.DoppioError('PageScreenshotConfigObject must be defined.');
+                throw new DoppioError('PageScreenshotConfigObject must be defined.');
             }
             if (PageScreenshotConfigObject.setContent &&
                 PageScreenshotConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You cannot use setContent and goto at the same time.');
+                throw new DoppioError('You cannot use setContent and goto at the same time.');
             }
             if (!PageScreenshotConfigObject.setContent &&
                 !PageScreenshotConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You need to set setContent or goto');
+                throw new DoppioError('You need to set setContent or goto');
             }
             const response = yield fetch('https://api.doppio.sh/v1/render/screenshot/direct', {
                 method: 'POST',
@@ -106,10 +105,10 @@ class Doppio {
             });
             if (response.status === 400) {
                 const errorBody = yield response.json();
-                throw new doppioError_1.DoppioError(`${errorBody.message}`);
+                throw new DoppioError(`${errorBody.message}`);
             }
             if (!response.ok) {
-                throw new doppioError_1.DoppioError(`HTTP error! status: ${response.status}`);
+                throw new DoppioError(`HTTP error! status: ${response.status}`);
             }
             const buffer = yield response.arrayBuffer();
             return buffer;
@@ -118,13 +117,13 @@ class Doppio {
     renderPdfSync(PagePdfConfigObject) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!PagePdfConfigObject) {
-                throw new doppioError_1.DoppioError('PagePdfConfigObject must be defined.');
+                throw new DoppioError('PagePdfConfigObject must be defined.');
             }
             if (PagePdfConfigObject.setContent && PagePdfConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You cannot use setContent and goto at the same time.');
+                throw new DoppioError('You cannot use setContent and goto at the same time.');
             }
             if (!PagePdfConfigObject.setContent && !PagePdfConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You need to set setContent or goto');
+                throw new DoppioError('You need to set setContent or goto');
             }
             const response = yield fetch('https://api.doppio.sh/v1/render/pdf/sync', {
                 method: 'POST',
@@ -137,10 +136,10 @@ class Doppio {
             });
             if (response.status === 400) {
                 const errorBody = yield response.json();
-                throw new doppioError_1.DoppioError(`${errorBody.message}`);
+                throw new DoppioError(`${errorBody.message}`);
             }
             if (!response.ok) {
-                throw new doppioError_1.DoppioError(`HTTP error! status: ${response.status}`);
+                throw new DoppioError(`HTTP error! status: ${response.status}`);
             }
             const parsedBody = yield response.json();
             return parsedBody;
@@ -149,15 +148,15 @@ class Doppio {
     renderScreenshotSync(PageScreenshotConfigObject) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!PageScreenshotConfigObject) {
-                throw new doppioError_1.DoppioError('PageScreenshotConfigObject must be defined.');
+                throw new DoppioError('PageScreenshotConfigObject must be defined.');
             }
             if (PageScreenshotConfigObject.setContent &&
                 PageScreenshotConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You cannot use setContent and goto at the same time.');
+                throw new DoppioError('You cannot use setContent and goto at the same time.');
             }
             if (!PageScreenshotConfigObject.setContent &&
                 !PageScreenshotConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You need to set setContent or goto');
+                throw new DoppioError('You need to set setContent or goto');
             }
             const response = yield fetch('https://api.doppio.sh/v1/render/screenshot/sync', {
                 method: 'POST',
@@ -170,10 +169,10 @@ class Doppio {
             });
             if (response.status === 400) {
                 const errorBody = yield response.json();
-                throw new doppioError_1.DoppioError(`${errorBody.message}`);
+                throw new DoppioError(`${errorBody.message}`);
             }
             if (!response.ok) {
-                throw new doppioError_1.DoppioError(`HTTP error! status: ${response.status}`);
+                throw new DoppioError(`HTTP error! status: ${response.status}`);
             }
             const parsedBody = yield response.json();
             return parsedBody;
@@ -182,16 +181,16 @@ class Doppio {
     renderPdfAsync(PagePdfConfigObject) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!PagePdfConfigObject) {
-                throw new doppioError_1.DoppioError('PagePdfConfigObject must be defined.');
+                throw new DoppioError('PagePdfConfigObject must be defined.');
             }
             if (PagePdfConfigObject.setContent && PagePdfConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You cannot use setContent and goto at the same time.');
+                throw new DoppioError('You cannot use setContent and goto at the same time.');
             }
             if (!PagePdfConfigObject.setContent && !PagePdfConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You need to set setContent or goto');
+                throw new DoppioError('You need to set setContent or goto');
             }
             if (!__classPrivateFieldGet(this, _Doppio_doppioConfig, "f").webhook) {
-                throw new doppioError_1.DoppioError('You need to set a webhook property to work with the async render method');
+                throw new DoppioError('You need to set a webhook property to work with the async render method');
             }
             const response = yield fetch('https://api.doppio.sh/v1/render/pdf/async', {
                 method: 'POST',
@@ -204,10 +203,10 @@ class Doppio {
             });
             if (response.status === 400) {
                 const errorBody = yield response.json();
-                throw new doppioError_1.DoppioError(`${errorBody.message}`);
+                throw new DoppioError(`${errorBody.message}`);
             }
             if (!response.ok) {
-                throw new doppioError_1.DoppioError(`HTTP error! status: ${response.status}`);
+                throw new DoppioError(`HTTP error! status: ${response.status}`);
             }
             const parsedBody = yield response.json();
             return parsedBody;
@@ -216,18 +215,18 @@ class Doppio {
     renderScreenshotAsync(PageScreenshotConfigObject) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!PageScreenshotConfigObject) {
-                throw new doppioError_1.DoppioError('PageScreenshotConfigObject must be defined.');
+                throw new DoppioError('PageScreenshotConfigObject must be defined.');
             }
             if (PageScreenshotConfigObject.setContent &&
                 PageScreenshotConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You cannot use setContent and goto at the same time.');
+                throw new DoppioError('You cannot use setContent and goto at the same time.');
             }
             if (!PageScreenshotConfigObject.setContent &&
                 !PageScreenshotConfigObject.goto) {
-                throw new doppioError_1.DoppioError('You need to set setContent or goto');
+                throw new DoppioError('You need to set setContent or goto');
             }
             if (!__classPrivateFieldGet(this, _Doppio_doppioConfig, "f").webhook) {
-                throw new doppioError_1.DoppioError('You need to set a webhook property to work with the async render method');
+                throw new DoppioError('You need to set a webhook property to work with the async render method');
             }
             const response = yield fetch('https://api.doppio.sh/v1/render/screenshot/async', {
                 method: 'POST',
@@ -240,10 +239,10 @@ class Doppio {
             });
             if (response.status === 400) {
                 const errorBody = yield response.json();
-                throw new doppioError_1.DoppioError(`${errorBody.message}`);
+                throw new DoppioError(`${errorBody.message}`);
             }
             if (!response.ok) {
-                throw new doppioError_1.DoppioError(`HTTP error! status: ${response.status}`);
+                throw new DoppioError(`HTTP error! status: ${response.status}`);
             }
             const parsedBody = yield response.json();
             return parsedBody;
@@ -262,10 +261,10 @@ class Doppio {
             });
             if (response.status === 400) {
                 const errorBody = yield response.json();
-                throw new doppioError_1.DoppioError(`${errorBody.message}`);
+                throw new DoppioError(`${errorBody.message}`);
             }
             if (!response.ok) {
-                throw new doppioError_1.DoppioError(`HTTP error! status: ${response.status}`);
+                throw new DoppioError(`HTTP error! status: ${response.status}`);
             }
             const buffer = yield response.arrayBuffer();
             return buffer;
@@ -284,10 +283,10 @@ class Doppio {
             });
             if (response.status === 400) {
                 const errorBody = yield response.json();
-                throw new doppioError_1.DoppioError(`${errorBody.message}`);
+                throw new DoppioError(`${errorBody.message}`);
             }
             if (!response.ok) {
-                throw new doppioError_1.DoppioError(`HTTP error! status: ${response.status}`);
+                throw new DoppioError(`HTTP error! status: ${response.status}`);
             }
             const parsedBody = yield response.json();
             return parsedBody;
@@ -306,10 +305,10 @@ class Doppio {
             });
             if (response.status === 400) {
                 const errorBody = yield response.json();
-                throw new doppioError_1.DoppioError(`${errorBody.message}`);
+                throw new DoppioError(`${errorBody.message}`);
             }
             if (!response.ok) {
-                throw new doppioError_1.DoppioError(`HTTP error! status: ${response.status}`);
+                throw new DoppioError(`HTTP error! status: ${response.status}`);
             }
             const parsedBody = yield response.json();
             return parsedBody;
@@ -318,3 +317,10 @@ class Doppio {
 }
 exports.Doppio = Doppio;
 _Doppio_apiKey = new WeakMap(), _Doppio_doppioConfig = new WeakMap(), _Doppio_launchConfig = new WeakMap();
+class DoppioError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'DoppioError';
+    }
+}
+exports.DoppioError = DoppioError;

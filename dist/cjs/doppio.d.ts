@@ -15,3 +15,6 @@ export declare class Doppio {
     renderTemplateSync(TemplateConfigObject: TemplateConfig): Promise<DoppioResponse>;
     renderTemplateAsync(TemplateConfigObject: TemplateConfig): Promise<DoppioResponseAsync>;
 }
+export declare class DoppioError extends Error {
+    constructor(message: string);
+}
