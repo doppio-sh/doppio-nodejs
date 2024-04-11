@@ -1,6 +1,5 @@
 'use strict';
 
-import { DoppioError } from './doppioError';
 import {
   DoppioConfig,
   LaunchConfig,
@@ -444,5 +443,12 @@ export class Doppio {
     const parsedBody = await response.json();
 
     return parsedBody;
+  }
+}
+
+export class DoppioError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DoppioError';
   }
 }

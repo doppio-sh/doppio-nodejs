@@ -5,9 +5,14 @@
   "engines": {
     "node": ">=17.5"
   },
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
+  "type": "module",
+  "main": "./dist/cjs/doppio.js",
+  "module": "./dist/esm/doppio.js",
   "types": "./dist/types/index.d.ts",
+  "exports": {
+    "require": "./dist/cjs/doppio.js",
+    "import": "./dist/esm/doppio.js"
+  },
   "files": [
     "./dist"
   ],
