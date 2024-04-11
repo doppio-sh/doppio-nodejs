@@ -1,6 +1,6 @@
 {
   "name": "doppio-nodejs",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "The doppio.sh official library - HTML to PDF - HTML to Screenshot - Templates",
   "engines": {
     "node": ">=17.5"
