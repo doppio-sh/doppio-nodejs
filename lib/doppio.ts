@@ -389,21 +389,18 @@ export class Doppio {
   async renderTemplateSync(
     TemplateConfigObject: TemplateConfig
   ): Promise<DoppioResponse> {
-    const response = await fetch(
-      'https://api.doppio.sh/v1/template/sync',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.#apiKey}`,
-          'User-Agent': 'Doppio/0.0.1',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...this.mergedConfigs(),
-          ...TemplateConfigObject,
-        }),
-      }
-    );
+    const response = await fetch('https://api.doppio.sh/v1/template/sync', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.#apiKey}`,
+        'User-Agent': 'Doppio/0.0.1',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...this.mergedConfigs(),
+        ...TemplateConfigObject,
+      }),
+    });
 
     if (response.status === 400) {
       const errorBody = await response.json();
@@ -422,21 +419,18 @@ export class Doppio {
   async renderTemplateAsync(
     TemplateConfigObject: TemplateConfig
   ): Promise<DoppioResponseAsync> {
-    const response = await fetch(
-      'https://api.doppio.sh/v1/template/async',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.#apiKey}`,
-          'User-Agent': 'Doppio/0.0.1',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...this.mergedConfigs(),
-          ...TemplateConfigObject,
-        }),
-      }
-    );
+    const response = await fetch('https://api.doppio.sh/v1/template/async', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.#apiKey}`,
+        'User-Agent': 'Doppio/0.0.1',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...this.mergedConfigs(),
+        ...TemplateConfigObject,
+      }),
+    });
 
     if (response.status === 400) {
       const errorBody = await response.json();
