@@ -1,5 +1,5 @@
 {
-  "name": "doppio-nodejs-client",
+  "name": "doppio-nodejs",
   "version": "0.0.1",
   "description": "The doppio.sh official library - HTML to PDF - HTML to Screenshot - Templates",
   "engines": {
