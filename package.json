@@ -5,6 +5,7 @@
   "engines": {
     "node": ">=17.5"
   },
+  "type": "module",
   "main": "./dist/cjs/doppio.js",
   "module": "./dist/esm/doppio.js",
   "types": "./dist/types/index.d.ts",
@@ -16,9 +17,10 @@
     "./dist"
   ],
   "scripts": {
+    "clean": "rimraf ./dist",
     "test": "jest --setupFiles dotenv/config",
     "tsc": "tsc -p tsconfig.json; tsc -p tsconfig-cjs.json",
-    "prepublishOnly": "npm run tsc && cp -R ./types ./dist/",
+    "prepublishOnly": "npm run clean && npm run tsc && cp -R ./types ./dist/",
     "prettier": "prettier --write ."
   },
   "author": "Renaud Lataguerra",
@@ -28,6 +30,7 @@
     "dotenv": "^16.4.5",
     "jest": "^29.7.0",
     "prettier": "3.2.5",
+    "rimraf": "^5.0.5",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.4"

@@ -1,7 +1,7 @@
 import path from 'path';
 import * as fs from 'node:fs/promises';
 
-import { Doppio } from '../dist/cjs/doppio';
+import { Doppio } from '../dist/esm/doppio';
 
 describe('Doppio PDF Test Suite', () => {
   test('Initialize Doppio', () => {
