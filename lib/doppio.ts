@@ -9,7 +9,17 @@ import {
   DoppioResponse,
   DoppioResponseAsync,
   DoppioAsyncConfig,
-} from './../types';
+} from '.';
+export {
+  DoppioConfig,
+  LaunchConfig,
+  PagePdfConfig,
+  TemplateConfig,
+  PageScreenshotConfig,
+  DoppioResponse,
+  DoppioResponseAsync,
+  DoppioAsyncConfig,
+}
 
 export class Doppio {
   #apiKey;

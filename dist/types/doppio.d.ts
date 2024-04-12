@@ -1,4 +1,5 @@
-import { DoppioConfig, LaunchConfig, PagePdfConfig, TemplateConfig, PageScreenshotConfig, DoppioResponse, DoppioResponseAsync, DoppioAsyncConfig } from './../types';
+import { DoppioConfig, LaunchConfig, PagePdfConfig, TemplateConfig, PageScreenshotConfig, DoppioResponse, DoppioResponseAsync, DoppioAsyncConfig } from '.';
+export { DoppioConfig, LaunchConfig, PagePdfConfig, TemplateConfig, PageScreenshotConfig, DoppioResponse, DoppioResponseAsync, DoppioAsyncConfig, };
 export declare class Doppio {
     #private;
     constructor(apiKey: string);
