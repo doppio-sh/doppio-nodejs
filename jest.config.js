@@ -7,8 +7,11 @@ export default {
   extensionsToTreatAsEsm: ['.ts'],
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[tj]sx?$': ['ts-jest', {
-      useESM: true,
-    }],
-  }
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
+  },
 };
