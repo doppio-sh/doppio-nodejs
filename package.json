@@ -11,7 +11,8 @@
   "types": "./dist/types/doppio.d.ts",
   "exports": {
     "require": "./dist/cjs/doppio.js",
-    "import": "./dist/esm/doppio.js"
+    "import": "./dist/esm/doppio.js",
+    "types": "./dist/types/doppio.d.ts"
   },
   "files": [
     "./dist"
