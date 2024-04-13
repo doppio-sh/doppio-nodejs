@@ -138,7 +138,8 @@ export interface TemplateConfig {
     templateData?: Record<any, any>;
     doppio?: DoppioConfig;
 }
-export declare class Doppio {
+export { Doppio };
+export default class Doppio {
     #private;
     constructor(apiKey: string);
     private mergedConfigs;

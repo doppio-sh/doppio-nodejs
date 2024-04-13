@@ -174,7 +174,8 @@ export interface TemplateConfig {
   doppio?: DoppioConfig;
 }
 
-export class Doppio {
+export { Doppio };
+export default class Doppio {
   #apiKey;
   #doppioConfig: DoppioConfig | DoppioAsyncConfig | null;
   #launchConfig: LaunchConfig | null;

@@ -24,7 +24,7 @@ npm install doppio-nodejs
 Once installed, you can import the library using `import` or `require` :
 
 ```js
-const doppio = require('doppio-nodejs');
+const { Doppio } = require('doppio-nodejs');
 // OR
 import { Doppio } from 'doppio-nodejs';
 ```

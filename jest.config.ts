@@ -1,13 +1,12 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
-export default {
+import type { JestConfigWithTsJest } from 'ts-jest';
+
+const jestConfig: JestConfigWithTsJest = {
+  testTimeout: 30000,
   preset: 'ts-jest/presets/default-esm',
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
   extensionsToTreatAsEsm: ['.ts'],
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[tj]sx?$': [
+    '^.+\\.m?[tj]sx?$': [
       'ts-jest',
       {
         useESM: true,
@@ -15,3 +14,5 @@ export default {
     ],
   },
 };
+
+export default jestConfig;

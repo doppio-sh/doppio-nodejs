@@ -23,14 +23,20 @@
   "engines": {
     "node": ">=17.5"
   },
-  "type": "module",
   "main": "./dist/cjs/doppio.js",
-  "module": "./dist/esm/doppio.js",
+  "module": "./dist/esm/doppio.mjs",
   "types": "./dist/types/doppio.d.ts",
   "exports": {
-    "require": "./dist/cjs/doppio.js",
-    "import": "./dist/esm/doppio.js",
-    "types": "./dist/types/doppio.d.ts"
+    ".": {
+      "require": {
+        "default": "./dist/cjs/doppio.js",
+        "types": "./dist/types/doppio.d.ts"
+      },
+      "import": {
+        "default": "./dist/esm/doppio.mjs",
+        "types": "./dist/types/doppio.d.ts"
+      }
+    }
   },
   "files": [
     "./dist"
@@ -39,7 +45,9 @@
     "clean": "rimraf ./dist",
     "test": "jest --setupFiles dotenv/config",
     "tsc": "tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && tsc -p tsconfig-types.json",
-    "prepublishOnly": "npm run clean && npm run tsc",
+    "prepublishOnly": "npm run clean && npm run tsc && npm run rename:esm",
+    "rename:cjs": "find ./dist/cjs -type f -name '*.js' -exec sh -c 'mv \"$1\" \"${1%.js}.cjs\"' _ {} \\;",
+    "rename:esm": "find ./dist/esm -type f -name '*.js' -exec sh -c 'mv \"$1\" \"${1%.js}.mjs\"' _ {} \\;",
     "prettier": "prettier --write ."
   },
   "author": "Renaud Lataguerra",
