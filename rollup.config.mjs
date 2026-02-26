@@ -12,7 +12,13 @@ export default [
       sourcemap: false,
     },
     plugins: [
-      typescript(),
+      typescript({
+        compilerOptions: {
+          declaration: false,
+          declarationMap: false,
+          outDir: 'dist/cjs',
+        },
+      }),
       nodeResolve(),
       terser({
         keep_classnames: true,
@@ -29,7 +35,13 @@ export default [
       sourcemap: false,
     },
     plugins: [
-      typescript(),
+      typescript({
+        compilerOptions: {
+          declaration: false,
+          declarationMap: false,
+          outDir: 'dist/esm',
+        },
+      }),
       nodeResolve(),
       terser({
         keep_classnames: true,

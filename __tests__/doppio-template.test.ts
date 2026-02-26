@@ -1,56 +1,88 @@
 import path from 'path';
 import * as fs from 'node:fs/promises';
 
-import { Doppio } from '../dist/esm/doppio.mjs';
+import { Doppio, DoppioError } from '../dist/esm/doppio.mjs';
 
 describe('Doppio Template Test Suite', () => {
-  test('Initialize Doppio', () => {
-    const doppioClient = new Doppio('XXXXXX');
-    expect(doppioClient).toEqual({});
-  });
-
-  test('ENV VAR DOPPIO_API_KEY', () => {
-    expect(process.env.DOPPIO_API_KEY).toBeDefined();
-  });
-
-  test('ENV VAR DOPPIO_TEMPLATE_ID', () => {
-    expect(process.env.DOPPIO_TEMPLATE_ID).toBeDefined();
-  });
-
-  test('Render a TEMPLATE (direct)', async () => {
-    const doppioClient = new Doppio(`${process.env.DOPPIO_API_KEY}`);
-
-    const buffer = await doppioClient.renderTemplateDirect({
-      templateId: process.env.DOPPIO_TEMPLATE_ID!,
+  describe('Initialization', () => {
+    test('should create a Doppio instance with valid API key', () => {
+      const doppioClient = new Doppio('test-api-key');
+      expect(doppioClient).toBeInstanceOf(Doppio);
     });
 
-    await fs.mkdir('./__tests__outputs', { recursive: true });
-    const filePath = path.join(
-      './__tests__outputs',
-      'test-render-template-direct.pdf'
-    );
-    await fs.writeFile(filePath, Buffer.from(buffer));
-
-    console.info(
-      'Test TEMPLATE(pdf) generated. Please open __tests__outputs/test-render-template-direct.pdf for visual inspection.'
-    );
-
-    expect(buffer).toBeInstanceOf(ArrayBuffer);
+    test('should throw DoppioError when API key is missing', () => {
+      expect(() => {
+        new Doppio('');
+      }).toThrow(DoppioError);
+      expect(() => {
+        new Doppio('');
+      }).toThrow('You must set your Doppio.sh API key');
+    });
   });
 
-  test('Render a TEMPLATE (sync)', async () => {
-    const doppioClient = new Doppio(`${process.env.DOPPIO_API_KEY}`);
+  describe('Template Rendering', () => {
+    test('should render a TEMPLATE (direct)', async () => {
+      const doppioClient = new Doppio(process.env.DOPPIO_API_KEY!);
 
-    const response = await doppioClient.renderTemplateSync({
-      templateId: process.env.DOPPIO_TEMPLATE_ID!,
+      const buffer = await doppioClient.renderTemplateDirect({
+        templateId: process.env.DOPPIO_TEMPLATE_ID!,
+      });
+
+      expect(buffer).toBeInstanceOf(ArrayBuffer);
+      expect(buffer.byteLength).toBeGreaterThan(0);
+
+      await fs.mkdir('./__tests__outputs', { recursive: true });
+      const filePath = path.join(
+        './__tests__outputs',
+        'test-render-template-direct.pdf'
+      );
+      await fs.writeFile(filePath, new Uint8Array(buffer));
     });
 
-    expect(response).toHaveProperty('doppioRequestId');
-    expect(response).toHaveProperty('renderStatus');
-    expect(response).toHaveProperty('documentUrl');
-    expect(response).toHaveProperty('isAsync');
-    expect(response).toHaveProperty('isCustomBucket');
+    test('should render a TEMPLATE (sync) and return document URL', async () => {
+      const doppioClient = new Doppio(process.env.DOPPIO_API_KEY!);
 
-    expect(response.renderStatus).toBe('SUCCESS');
+      const response = await doppioClient.renderTemplateSync({
+        templateId: process.env.DOPPIO_TEMPLATE_ID!,
+      });
+
+      expect(response).toHaveProperty('doppioRequestId');
+      expect(response).toHaveProperty('renderStatus');
+      expect(response).toHaveProperty('documentUrl');
+      expect(response).toHaveProperty('isAsync');
+      expect(response).toHaveProperty('isCustomBucket');
+      expect(typeof response.doppioRequestId).toBe('string');
+      expect(typeof response.documentUrl).toBe('string');
+      expect(response.renderStatus).toBe('SUCCESS');
+      expect(response.isAsync).toBe(false);
+    });
+
+    test('should render a TEMPLATE (async) and return requestId and jobId', async () => {
+      const doppioClient = new Doppio(process.env.DOPPIO_API_KEY!);
+
+      const response = await doppioClient.renderTemplateAsync({
+        templateId: process.env.DOPPIO_TEMPLATE_ID!,
+      });
+
+      expect(response).toHaveProperty('requestId');
+      expect(response).toHaveProperty('jobId');
+      expect(typeof response.requestId).toBe('string');
+      expect(typeof response.jobId).toBe('string');
+    });
+
+    test('should render a TEMPLATE with templateData', async () => {
+      const doppioClient = new Doppio(process.env.DOPPIO_API_KEY!);
+
+      const buffer = await doppioClient.renderTemplateDirect({
+        templateId: process.env.DOPPIO_TEMPLATE_ID!,
+        templateData: {
+          title: 'Test Title',
+          content: 'Test Content',
+        },
+      });
+
+      expect(buffer).toBeInstanceOf(ArrayBuffer);
+      expect(buffer.byteLength).toBeGreaterThan(0);
+    });
   });
 });

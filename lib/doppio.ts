@@ -260,7 +260,10 @@ export default class Doppio {
       throw new DoppioError('You need to set setContent or goto');
     }
 
-    if (!(this.#doppioConfig as DoppioAsyncConfig).webhook) {
+    if (
+      !this.#doppioConfig ||
+      !(this.#doppioConfig as DoppioAsyncConfig).webhook
+    ) {
       throw new DoppioError(
         'You need to set a webhook property to work with the async render method'
       );
@@ -316,7 +319,10 @@ export default class Doppio {
       throw new DoppioError('You need to set setContent or goto');
     }
 
-    if (!(this.#doppioConfig as DoppioAsyncConfig).webhook) {
+    if (
+      !this.#doppioConfig ||
+      !(this.#doppioConfig as DoppioAsyncConfig).webhook
+    ) {
       throw new DoppioError(
         'You need to set a webhook property to work with the async render method'
       );
