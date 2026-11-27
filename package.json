@@ -42,10 +42,13 @@
     "./dist"
   ],
   "scripts": {
-    "prepublishOnly": "npm run clean && rollup -c && tsc -p tsconfig-types.json",
+    "build": "npm run clean && rollup -c && tsc -p tsconfig-types.json",
     "clean": "rimraf ./dist",
+    "typecheck": "tsc --noEmit",
+    "pretest": "npm run build",
     "test": "jest --setupFiles dotenv/config",
-    "prettier": "prettier --write ."
+    "prettier": "prettier --write .",
+    "prepublishOnly": "npm run build"
   },
   "author": "Renaud Lataguerra",
   "license": "MIT",
