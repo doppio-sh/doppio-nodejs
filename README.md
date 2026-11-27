@@ -15,7 +15,7 @@ Below are examples to get you started. For additional examples, please see our o
 
 ## Install
 
-- Requires node.js >=17.5
+- Requires node.js >=18
 
 ```sh
 npm install doppio-nodejs

@@ -1,16 +1,14 @@
-'use strict';
-
-import {
-  DoppioConfig,
+import type {
   DoppioAsyncConfig,
-  LaunchConfig,
-  PagePdfConfig,
-  PageScreenshotConfig,
+  DoppioConfig,
   DoppioResponse,
   DoppioResponseAsync,
-  TemplateConfig,
+  LaunchConfig,
   MergedConfigs,
-} from './types';
+  PagePdfConfig,
+  PageScreenshotConfig,
+  TemplateConfig,
+} from './types.js';
 
 export { Doppio };
 export default class Doppio {
@@ -41,11 +39,11 @@ export default class Doppio {
     return config;
   }
 
-  doppio(doppioConfigObject: DoppioConfig | DoppioAsyncConfig) {
+  doppio(doppioConfigObject: DoppioConfig | DoppioAsyncConfig): void {
     this.#doppioConfig = doppioConfigObject;
   }
 
-  launch(launchConfigObject: LaunchConfig) {
+  launch(launchConfigObject: LaunchConfig): void {
     this.#launchConfig = launchConfigObject;
   }
 

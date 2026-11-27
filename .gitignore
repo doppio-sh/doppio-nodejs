@@ -1,7 +1,7 @@
 node_modules/
 dist/
 coverage/
-__tests__outputs/
+test/e2e/output/
 *.log
 *.tgz
 .DS_Store

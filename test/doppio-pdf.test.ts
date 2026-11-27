@@ -1,10 +1,9 @@
-import path from 'path';
-import * as fs from 'node:fs/promises';
+import { describe, expect, test } from 'vitest';
 
-import { Doppio, DoppioError } from '../dist/esm/doppio.mjs';
+import { Doppio, DoppioError } from '../src/index.js';
 
 describe('Doppio PDF Test Suite', () => {
-  const API_KEY = process.env.DOPPIO_API_KEY || 'test-api-key';
+  const API_KEY = 'test-api-key';
 
   describe('Initialization', () => {
     test('should create a Doppio instance with valid API key', () => {
@@ -23,7 +22,8 @@ describe('Doppio PDF Test Suite', () => {
 
     test('should throw DoppioError when API key is undefined', () => {
       expect(() => {
-          new Doppio(undefined);
+        // @ts-expect-error: exercises the runtime check for untyped callers
+        new Doppio(undefined);
       }).toThrow(DoppioError);
     });
   });
@@ -55,9 +55,11 @@ describe('Doppio PDF Test Suite', () => {
   describe('Validation', () => {
     test('should throw error when PagePdfConfigObject is undefined', async () => {
       const doppioClient = new Doppio(API_KEY);
+      // @ts-expect-error: exercises the runtime check for untyped callers
       await expect(doppioClient.renderPdfDirect(undefined)).rejects.toThrow(
         DoppioError
       );
+      // @ts-expect-error: exercises the runtime check for untyped callers
       await expect(doppioClient.renderPdfDirect(undefined)).rejects.toThrow(
         'PagePdfConfigObject must be defined.'
       );
@@ -124,116 +126,6 @@ describe('Doppio PDF Test Suite', () => {
       ).rejects.toThrow(
         'You need to set a webhook property to work with the async render method'
       );
-    });
-  });
-
-  describe('PDF Rendering', () => {
-    const TEST_HTML = 'PGh0bWw+CjxwPnRlc3Q8L3A+CjwvaHRtbD4=';
-
-    test('should render a PDF (direct) with setContent', async () => {
-      const doppioClient = new Doppio(process.env.DOPPIO_API_KEY!);
-
-      const buffer = await doppioClient.renderPdfDirect({
-        pdf: {
-          printBackground: true,
-        },
-        setContent: {
-          html: TEST_HTML,
-          options: {
-            waitUntil: ['networkidle0'],
-          },
-        },
-      });
-
-      expect(buffer).toBeInstanceOf(ArrayBuffer);
-      expect(buffer.byteLength).toBeGreaterThan(0);
-
-      await fs.mkdir('./__tests__outputs', { recursive: true });
-      const filePath = path.join(
-        './__tests__outputs',
-        'test-render-pdf-direct.pdf'
-      );
-      await fs.writeFile(filePath, new Uint8Array(buffer));
-    });
-
-    test('should render a PDF (direct) with goto URL', async () => {
-      const doppioClient = new Doppio(process.env.DOPPIO_API_KEY!);
-
-      const buffer = await doppioClient.renderPdfDirect({
-        pdf: {
-          printBackground: true,
-        },
-        goto: {
-          url: 'https://www.wikipedia.org',
-          options: {
-            waitUntil: ['networkidle0'],
-          },
-        },
-      });
-
-      expect(buffer).toBeInstanceOf(ArrayBuffer);
-      expect(buffer.byteLength).toBeGreaterThan(0);
-
-      await fs.mkdir('./__tests__outputs', { recursive: true });
-      const filePath = path.join(
-        './__tests__outputs',
-        'test-render-pdf-direct-url.pdf'
-      );
-      await fs.writeFile(filePath, new Uint8Array(buffer));
-    });
-
-    test('should render a PDF (sync) and return document URL', async () => {
-      const doppioClient = new Doppio(process.env.DOPPIO_API_KEY!);
-
-      const response = await doppioClient.renderPdfSync({
-        pdf: {
-          printBackground: true,
-        },
-        setContent: {
-          html: TEST_HTML,
-          options: {
-            waitUntil: ['networkidle0'],
-          },
-        },
-      });
-
-      expect(response).toHaveProperty('doppioRequestId');
-      expect(response).toHaveProperty('renderStatus');
-      expect(response).toHaveProperty('documentUrl');
-      expect(response).toHaveProperty('isAsync');
-      expect(response).toHaveProperty('isCustomBucket');
-      expect(typeof response.doppioRequestId).toBe('string');
-      expect(typeof response.documentUrl).toBe('string');
-      expect(response.renderStatus).toBe('SUCCESS');
-      expect(response.isAsync).toBe(false);
-    });
-
-    test('should render a PDF (async) with webhook', async () => {
-      const doppioClient = new Doppio(process.env.DOPPIO_API_KEY!);
-
-      doppioClient.doppio({
-        webhook: {
-          url: process.env.DOPPIO_WEBHOOK_URL!,
-          method: 'POST',
-        },
-      });
-
-      const response = await doppioClient.renderPdfAsync({
-        pdf: {
-          printBackground: true,
-        },
-        setContent: {
-          html: TEST_HTML,
-          options: {
-            waitUntil: ['networkidle0'],
-          },
-        },
-      });
-
-      expect(response).toHaveProperty('requestId');
-      expect(response).toHaveProperty('jobId');
-      expect(typeof response.requestId).toBe('string');
-      expect(typeof response.jobId).toBe('string');
     });
   });
 });

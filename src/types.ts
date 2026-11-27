@@ -1,5 +1,3 @@
-'use strict';
-
 export type WaitUntilOption =
   | 'domcontentloaded'
   | 'networkidle0'

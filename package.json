@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/doppio-sh/doppio-nodejs.git"
+    "url": "git+https://github.com/doppio-sh/doppio-nodejs.git"
   },
   "keywords": [
     "doppio",
@@ -20,51 +20,48 @@
     "puppeteer",
     "headless"
   ],
+  "type": "module",
   "engines": {
-    "node": ">=17.5"
+    "node": ">=18"
   },
-  "main": "./dist/cjs/doppio.js",
-  "module": "./dist/esm/doppio.mjs",
-  "types": "./dist/types/index.d.ts",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.cts",
   "exports": {
     ".": {
-      "require": {
-        "default": "./dist/cjs/doppio.js",
-        "types": "./dist/types/index.d.ts"
-      },
       "import": {
-        "default": "./dist/esm/doppio.mjs",
-        "types": "./dist/types/index.d.ts"
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
       }
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "./dist"
+    "dist"
   ],
   "scripts": {
-    "build": "npm run clean && rollup -c && tsc -p tsconfig-types.json",
-    "clean": "rimraf ./dist",
+    "build": "tsdown",
     "typecheck": "tsc --noEmit",
-    "pretest": "npm run build",
-    "test": "jest --setupFiles dotenv/config",
-    "prettier": "prettier --write .",
-    "prepublishOnly": "npm run build"
+    "lint": "biome check",
+    "format": "biome check --write",
+    "test": "vitest run --project unit",
+    "test:e2e": "vitest run --project e2e",
+    "check:package": "tsdown && publint && attw --pack .",
+    "prepack": "npm run build"
   },
   "author": "Renaud Lataguerra",
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^12.3.0",
-    "@types/jest": "^29.5.12",
-    "dotenv": "^16.4.5",
-    "jest": "^29.7.0",
-    "prettier": "3.2.5",
-    "rimraf": "^5.0.5",
-    "rollup": "^4.53.2",
-    "ts-jest": "^29.1.2",
-    "ts-node": "^10.9.2",
-    "tslib": "^2.6.2",
-    "typescript": "^5.4.4"
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@biomejs/biome": "2.6.9",
+    "@types/node": "^22.20.7",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.7",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.2"
   }
 }
