@@ -10,10 +10,13 @@ import type {
   DoppioConfig,
   DoppioResponse,
   DoppioResponseAsync,
+  DoppioStatistics,
   LaunchConfig,
   PagePdfConfig,
   PageScreenshotConfig,
   RequestOptions,
+  ResponseInfo,
+  SyncRequestOptions,
   TemplateConfig,
 } from './types.js';
 
@@ -26,6 +29,7 @@ const MAX_RETRY_DELAY_MS = 30_000;
 
 type DoppioSection = DoppioConfig | DoppioAsyncConfig;
 type PageConfigName = 'PagePdfConfigObject' | 'PageScreenshotConfigObject';
+type OnResponse = (response: ResponseInfo) => void;
 
 interface RenderConfig {
   doppio?: DoppioSection;
@@ -53,6 +57,7 @@ export class Doppio {
   readonly #timeout: number | undefined;
   readonly #maxRetries: number;
   readonly #fetch: typeof fetch | undefined;
+  readonly #onResponse: OnResponse | undefined;
   #doppioConfig: DoppioSection | undefined;
   #launchConfig: LaunchConfig | undefined;
 
@@ -70,6 +75,7 @@ export class Doppio {
     this.#timeout = options.timeout;
     this.#maxRetries = options.maxRetries ?? 0;
     this.#fetch = options.fetch;
+    this.#onResponse = options.onResponse;
     this.#doppioConfig = options.doppio;
     this.#launchConfig = options.launch;
   }
@@ -115,19 +121,23 @@ export class Doppio {
   /** Renders a PDF and resolves with the URL where it is stored. */
   async renderPdfSync(
     page: PagePdfConfig,
-    options?: RequestOptions
+    options?: SyncRequestOptions
   ): Promise<DoppioResponse> {
     const body = this.#pageBody(page, 'PagePdfConfigObject', options);
-    return this.#json('/v1/render/pdf/sync', body, options);
+    return this.#json('/v1/render/pdf/sync', withDebug(body, options), options);
   }
 
   /** Renders a screenshot and resolves with the URL where it is stored. */
   async renderScreenshotSync(
     page: PageScreenshotConfig,
-    options?: RequestOptions
+    options?: SyncRequestOptions
   ): Promise<DoppioResponse> {
     const body = this.#pageBody(page, 'PageScreenshotConfigObject', options);
-    return this.#json('/v1/render/screenshot/sync', body, options);
+    return this.#json(
+      '/v1/render/screenshot/sync',
+      withDebug(body, options),
+      options
+    );
   }
 
   /**
@@ -184,6 +194,22 @@ export class Doppio {
   ): Promise<DoppioResponseAsync> {
     const body = this.#templateBody(template, options);
     return this.#json('/v1/template/async', body, options);
+  }
+
+  /** Resolves with the render counts of your organization for this month. */
+  async getStatistics(
+    options?: Pick<
+      RequestOptions,
+      'signal' | 'timeout' | 'maxRetries' | 'onResponse'
+    >
+  ): Promise<DoppioStatistics> {
+    return this.#request(
+      'GET',
+      '/v1/statistics',
+      undefined,
+      readJson<DoppioStatistics>,
+      options
+    );
   }
 
   #pageBody(
@@ -247,7 +273,7 @@ export class Doppio {
     body: object,
     options: RequestOptions | undefined
   ): Promise<ArrayBuffer> {
-    return this.#request(path, body, readBinary, options);
+    return this.#request('POST', path, body, readBinary, options);
   }
 
   #json<T>(
@@ -255,17 +281,19 @@ export class Doppio {
     body: object,
     options: RequestOptions | undefined
   ): Promise<T> {
-    return this.#request(path, body, readJson<T>, options);
+    return this.#request('POST', path, body, readJson<T>, options);
   }
 
   async #request<T>(
+    method: 'GET' | 'POST',
     path: string,
-    body: object,
+    body: object | undefined,
     read: (response: Response) => Promise<T>,
-    options: RequestOptions = {}
+    options: Omit<RequestOptions, 'doppio' | 'launch'> = {}
   ): Promise<T> {
     const timeout = options.timeout ?? this.#timeout;
     const maxRetries = options.maxRetries ?? this.#maxRetries;
+    const onResponse = options.onResponse ?? this.#onResponse;
     const { signal } = options;
     const controller = new AbortController();
     const forwardAbort = (): void => controller.abort(signal?.reason);
@@ -283,7 +311,13 @@ export class Doppio {
     try {
       for (let attempt = 0; ; attempt++) {
         controller.signal.throwIfAborted();
-        const response = await this.#send(path, body, controller.signal);
+        const response = await this.#send(
+          method,
+          path,
+          body,
+          controller.signal
+        );
+        notify(onResponse, response);
         if (response.ok) return await read(response);
         if (attempt < maxRetries && RETRYABLE_STATUSES.has(response.status)) {
           await response.body?.cancel();
@@ -309,18 +343,39 @@ export class Doppio {
     }
   }
 
-  #send(path: string, body: object, signal: AbortSignal): Promise<Response> {
+  #send(
+    method: 'GET' | 'POST',
+    path: string,
+    body: object | undefined,
+    signal: AbortSignal
+  ): Promise<Response> {
     const fetchFn = this.#fetch ?? globalThis.fetch;
     return fetchFn(`${this.#baseUrl}${path}`, {
-      method: 'POST',
+      method,
       headers: {
         Authorization: `Bearer ${this.#apiKey}`,
         'User-Agent': USER_AGENT,
-        'Content-Type': 'application/json',
+        ...(body && { 'Content-Type': 'application/json' }),
       },
-      body: JSON.stringify(body),
+      ...(body && { body: JSON.stringify(body) }),
       signal,
     });
+  }
+}
+
+function withDebug(
+  body: object,
+  options: SyncRequestOptions | undefined
+): object {
+  return options?.debug ? { ...body, debug: true } : body;
+}
+
+function notify(onResponse: OnResponse | undefined, response: Response): void {
+  if (!onResponse) return;
+  try {
+    onResponse({ status: response.status, headers: response.headers });
+  } catch (cause) {
+    throw new DoppioError('The onResponse callback threw an error', { cause });
   }
 }
 

@@ -7,6 +7,7 @@ export type HttpMethodOption = 'POST' | 'PUT' | 'GET' | 'DELETE' | 'PATCH';
 export type PageFormat =
   | 'Letter'
   | 'Legal'
+  | 'Tabloid'
   | 'Ledger'
   | 'A0'
   | 'A1'
@@ -49,22 +50,27 @@ export interface LaunchConfig {
   };
 }
 
+/** @deprecated Internal type that is no longer used. Removed in 1.0. */
 export interface MergedConfigs {
   doppio?: DoppioConfig | DoppioAsyncConfig;
   launch?: LaunchConfig;
 }
 
 export interface SetContentConfig {
+  /** Page HTML, encoded in base64. See {@link encodeBase64}. */
   html: string;
   options?: {
-    waitUntil: WaitUntilOption[];
+    waitUntil?: WaitUntilOption[];
   };
 }
 
 export interface GotoConfig {
+  /** URL to render, scheme included. */
   url: string;
   options?: {
-    waitUntil: WaitUntilOption[];
+    waitUntil?: WaitUntilOption[];
+    /** Overrides the `Referer` header set by `setExtraHTTPHeaders`. */
+    referer?: string;
   };
 }
 
@@ -96,16 +102,19 @@ export interface AuthenticateConfig {
   password: string;
 }
 
+/** Follows the Chrome DevTools Protocol `Network.CookieParam` type. */
 export interface CookiesConfig {
   name: string;
   value: string;
-  domain: string;
+  /** Set either `domain` or `url`. */
+  domain?: string;
   url?: string;
   path?: string;
   secure?: boolean;
   httpOnly?: boolean;
-  sameSite?: string;
-  expires?: string;
+  sameSite?: 'Strict' | 'Lax' | 'None' | (string & Record<never, never>);
+  /** Expiration date, in seconds since the Unix epoch. */
+  expires?: number | string;
 }
 
 export interface LocalStorageConfig {
@@ -131,10 +140,19 @@ export interface WaitForSelectorConfig {
 }
 
 export interface PagePdfConfig {
+  /** Page to render from a URL. Cannot be combined with `setContent`. */
   goto?: GotoConfig;
+  /** Page to render from HTML. Cannot be combined with `goto`. */
   setContent?: SetContentConfig;
   setJavaScriptEnabled?: boolean;
-  emulateMediaType?: string;
+  /** CSS media type to emulate. `null` disables the emulation. */
+  emulateMediaType?:
+    | 'screen'
+    | 'print'
+    | null
+    | (string & Record<never, never>);
+  /** Timezone ID used by the page, such as `Europe/Paris`. */
+  emulateTimezone?: string;
   setExtraHTTPHeaders?: Record<string, string>;
   authenticate?: AuthenticateConfig;
   pdf?: PdfConfig;
@@ -160,10 +178,68 @@ export interface PageScreenshotConfig extends Omit<PagePdfConfig, 'pdf'> {
 
 export interface DoppioResponse {
   doppioRequestId: string;
-  renderStatus: string;
+  renderStatus: 'SUCCESS' | 'ERROR';
   documentUrl: string;
   isAsync: boolean;
   isCustomBucket: boolean;
+  /** Browser console output, sent back when the call used `debug: true`. */
+  consoleOutput?: DoppioConsoleMessage[];
+}
+
+export interface DoppioConsoleMessage {
+  /** Console method that produced the message, such as `log` or `error`. */
+  type: string;
+  text: string;
+  location?: {
+    url?: string;
+    lineNumber?: number;
+    columnNumber?: number;
+  };
+}
+
+/** Body that Doppio sends to your webhook once an async render is done. */
+export interface DoppioWebhookPayload {
+  /** Same ID as the `requestId` returned by the async render call. */
+  doppioRequestId: string;
+  renderStatus: 'SUCCESS' | 'ERROR';
+  documentUrl: string;
+  isAsync: true;
+  isCustomBucket: boolean;
+}
+
+/** Monthly usage of your organization, as returned by `getStatistics()`. */
+export interface DoppioStatistics {
+  data: {
+    month: string;
+    year: string;
+    totalCallCount: string;
+    successCount: string;
+    failureCount: string;
+  };
+}
+
+/** Rate-limit and quota headers of a response. See `parseUsageHeaders()`. */
+export interface DoppioUsage {
+  /** Requests allowed per minute. */
+  rateLimit?: number;
+  /** Requests left in the current minute. */
+  rateLimitRemaining?: number;
+  /** Seconds until the rate limit resets. */
+  rateLimitReset?: number;
+  /** Seconds to wait before retrying, sent with 429 responses. */
+  retryAfter?: number;
+  /** Renders included in the subscription for the current month. */
+  monthlyLimit?: number;
+  /** Renders made during the current month. */
+  monthlyUsage?: number;
+  /** Renders left for the current month. */
+  monthlyRemaining?: number;
+}
+
+/** Status and headers of an HTTP response, passed to `onResponse`. */
+export interface ResponseInfo {
+  status: number;
+  headers: Headers;
 }
 
 export interface DoppioResponseAsync {
@@ -199,6 +275,11 @@ export interface DoppioClientOptions {
   doppio?: DoppioConfig | DoppioAsyncConfig;
   /** `launch` config sent with every request. */
   launch?: LaunchConfig;
+  /**
+   * Called with the status and headers of every HTTP response, retries
+   * included. Use {@link parseUsageHeaders} to read the quota headers.
+   */
+  onResponse?: (response: ResponseInfo) => void;
 }
 
 export interface RequestOptions {
@@ -212,4 +293,11 @@ export interface RequestOptions {
   doppio?: DoppioConfig | DoppioAsyncConfig;
   /** Merged over the client `launch` config for this call only. */
   launch?: LaunchConfig;
+  /** Overrides the client `onResponse` for this call. */
+  onResponse?: (response: ResponseInfo) => void;
+}
+
+export interface SyncRequestOptions extends RequestOptions {
+  /** Sends the browser console output back in `consoleOutput`. */
+  debug?: boolean;
 }
