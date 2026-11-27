@@ -1,7 +1,11 @@
+import { readFileSync } from 'node:fs';
 import { expect, type Mock, vi } from 'vitest';
 
-import { Doppio, DoppioError } from '../src/index.js';
+import { Doppio, DoppioError, type RequestOptions } from '../src/index.js';
 
+export const SDK_VERSION: string = JSON.parse(
+  readFileSync('package.json', 'utf8')
+).version;
 export const API_KEY = 'test-api-key';
 export const API_URL = 'https://api.doppio.sh';
 export const HTML = 'PGh0bWw+CjxwPnRlc3Q8L3A+CjwvaHRtbD4=';
@@ -122,10 +126,14 @@ export const ALL_METHODS: MethodCase[] = [...PAGE_METHODS, ...TEMPLATE_METHODS];
 export function call(
   client: Doppio,
   method: MethodName,
-  arg: unknown
+  arg: unknown,
+  options?: RequestOptions
 ): Promise<unknown> {
-  const fn = client[method] as (arg: unknown) => Promise<unknown>;
-  return fn.call(client, arg);
+  const fn = client[method] as (
+    arg: unknown,
+    options?: RequestOptions
+  ) => Promise<unknown>;
+  return fn.call(client, arg, options);
 }
 
 export function jsonResponse(
@@ -152,11 +160,44 @@ export function successResponse(output: MethodCase['output']): Response {
 }
 
 export function stubFetch(
-  respond: () => Response | Promise<Response>
+  respond: (init: RequestInit | undefined) => Response | Promise<Response>
 ): Mock<typeof fetch> {
-  const fetchMock = vi.fn<typeof fetch>(async () => respond());
+  const fetchMock = vi.fn<typeof fetch>(async (_input, init) => respond(init));
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
+}
+
+export function stubFetchSequence(
+  responses: Array<() => Response>
+): Mock<typeof fetch> {
+  let index = 0;
+  return stubFetch(() => {
+    const next = responses[Math.min(index++, responses.length - 1)];
+    if (!next) throw new Error('No response configured');
+    return next();
+  });
+}
+
+export function stubHangingFetch(): Mock<typeof fetch> {
+  return stubFetch(
+    (init) =>
+      new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener(
+          'abort',
+          () => reject(init.signal?.reason),
+          { once: true }
+        );
+      })
+  );
+}
+
+export async function rejectionOf(promise: Promise<unknown>): Promise<unknown> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('Expected the promise to reject');
 }
 
 export function lastRequest(fetchMock: Mock<typeof fetch>): {

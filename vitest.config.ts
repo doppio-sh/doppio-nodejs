@@ -1,6 +1,10 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vitest/config';
 
+const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
+
 export default defineConfig({
+  define: { __SDK_VERSION__: JSON.stringify(version) },
   test: {
     coverage: {
       provider: 'v8',
@@ -14,6 +18,7 @@ export default defineConfig({
     },
     projects: [
       {
+        extends: true,
         test: {
           name: 'unit',
           include: ['test/*.test.ts'],
@@ -21,6 +26,7 @@ export default defineConfig({
         },
       },
       {
+        extends: true,
         test: {
           name: 'e2e',
           include: ['test/e2e/*.e2e.test.ts'],

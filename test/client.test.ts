@@ -8,9 +8,17 @@ describe('Doppio constructor', () => {
     expect(new Doppio(API_KEY)).toBeInstanceOf(Doppio);
   });
 
+  test('creates a client with an options object', () => {
+    expect(new Doppio({ apiKey: API_KEY, timeout: 1000 })).toBeInstanceOf(
+      Doppio
+    );
+  });
+
   test.each([
     ['an empty string', ''],
     ['undefined', undefined],
+    ['null', null],
+    ['an options object without key', { apiKey: '' }],
   ])('throws a DoppioError when the API key is %s', (_label, apiKey) => {
     expect(() => new Doppio(apiKey as string)).toThrow(DoppioError);
     expect(() => new Doppio(apiKey as string)).toThrow(
@@ -26,5 +34,11 @@ describe('DoppioError', () => {
     expect(error).toBeInstanceOf(Error);
     expect(error.name).toBe('DoppioError');
     expect(error.message).toBe('boom');
+  });
+
+  test('keeps the cause it was given', () => {
+    const cause = new Error('root');
+
+    expect(new DoppioError('boom', { cause }).cause).toBe(cause);
   });
 });

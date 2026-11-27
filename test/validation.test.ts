@@ -87,14 +87,43 @@ describe.each(PAGE_METHODS.filter((m) => m.requiresWebhook))(
       await call(client, method.name, method.validArg);
       expect(fetchMock).toHaveBeenCalledOnce();
     });
+
+    test('accepts a webhook passed in the call options', async () => {
+      const fetchMock = stubFetch(() => successResponse(method.output));
+
+      await call(new Doppio(API_KEY), method.name, method.validArg, {
+        doppio: { webhook: WEBHOOK },
+      });
+      expect(fetchMock).toHaveBeenCalledOnce();
+    });
   }
 );
 
 describe.each(TEMPLATE_METHODS)('$name input validation', (method) => {
-  test('sends the request without validating the template config', async () => {
+  test('rejects a missing template config without calling the API', async () => {
     const fetchMock = stubFetch(() => successResponse(method.output));
 
-    await call(new Doppio(API_KEY), method.name, undefined);
-    expect(fetchMock).toHaveBeenCalledOnce();
+    await expectDoppioError(
+      call(new Doppio(API_KEY), method.name, undefined),
+      'TemplateConfigObject must be defined.'
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  test('rejects a template config without templateId', async () => {
+    const fetchMock = stubFetch(() => successResponse(method.output));
+
+    await expectDoppioError(
+      call(new Doppio(API_KEY), method.name, { templateData: { a: 1 } }),
+      'You need to set a templateId'
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+test('renderTemplateAsync does not require a webhook', async () => {
+  const fetchMock = stubFetch(() => successResponse('async'));
+
+  await new Doppio(API_KEY).renderTemplateAsync({ templateId: 'tpl_123' });
+  expect(fetchMock).toHaveBeenCalledOnce();
 });

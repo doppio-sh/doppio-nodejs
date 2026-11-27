@@ -176,3 +176,40 @@ export interface TemplateConfig {
   templateData?: Record<any, any>;
   doppio?: DoppioConfig;
 }
+
+export interface DoppioClientOptions {
+  /** API key of your organization, from the Doppio dashboard. */
+  apiKey: string;
+  /** @defaultValue `'https://api.doppio.sh'` */
+  baseUrl?: string;
+  /**
+   * Maximum duration of a call in milliseconds, retries included.
+   * @defaultValue no timeout
+   */
+  timeout?: number;
+  /**
+   * Number of retries after a 429, 502 or 503 response. Waits for the
+   * `Retry-After` delay when the API sends one.
+   * @defaultValue `0`
+   */
+  maxRetries?: number;
+  /** Custom `fetch`, e.g. to go through a proxy. Defaults to the global one. */
+  fetch?: typeof fetch;
+  /** `doppio` config sent with every request. */
+  doppio?: DoppioConfig | DoppioAsyncConfig;
+  /** `launch` config sent with every request. */
+  launch?: LaunchConfig;
+}
+
+export interface RequestOptions {
+  /** Cancels the call. The promise then rejects with the signal's reason. */
+  signal?: AbortSignal;
+  /** Overrides the client `timeout` for this call. */
+  timeout?: number;
+  /** Overrides the client `maxRetries` for this call. */
+  maxRetries?: number;
+  /** Merged over the client `doppio` config for this call only. */
+  doppio?: DoppioConfig | DoppioAsyncConfig;
+  /** Merged over the client `launch` config for this call only. */
+  launch?: LaunchConfig;
+}
