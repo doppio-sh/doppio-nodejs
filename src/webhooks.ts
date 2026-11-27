@@ -5,8 +5,11 @@ export interface VerifyWebhookSignatureOptions {
   payload: string | ArrayBuffer | Uint8Array;
   /** Value of the `x-doppio-payload-signature` request header. */
   signature: string | null | undefined;
-  /** Webhook secret of your organization, from the Doppio dashboard. */
-  secret: string;
+  /**
+   * Webhook secret of your organization, from the Doppio dashboard. The
+   * function throws a `DoppioError` when it is missing.
+   */
+  secret: string | undefined;
 }
 
 /**
@@ -21,6 +24,9 @@ export async function verifyWebhookSignature({
   signature,
   secret,
 }: VerifyWebhookSignatureOptions): Promise<boolean> {
+  if (!secret) {
+    throw new DoppioError('You must set your Doppio.sh webhook secret');
+  }
   const expected = signature ? hexToBytes(signature) : undefined;
   if (!expected) return false;
 

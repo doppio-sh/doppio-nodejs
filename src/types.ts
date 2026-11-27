@@ -254,8 +254,11 @@ export interface TemplateConfig {
 }
 
 export interface DoppioClientOptions {
-  /** API key of your organization, from the Doppio dashboard. */
-  apiKey: string;
+  /**
+   * API key of your organization, from the Doppio dashboard. The constructor
+   * throws a `DoppioError` when it is missing.
+   */
+  apiKey: string | undefined;
   /** @defaultValue `'https://api.doppio.sh'` */
   baseUrl?: string;
   /**

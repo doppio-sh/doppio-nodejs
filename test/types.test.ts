@@ -12,6 +12,15 @@ import type {
 } from '../src/index.js';
 
 describe('public types', () => {
+  test('accept an API key read from an environment variable', () => {
+    expectTypeOf<string | undefined>().toExtend<
+      ConstructorParameters<typeof Doppio>[0]
+    >();
+    expectTypeOf<{ apiKey: string | undefined }>().toExtend<
+      ConstructorParameters<typeof Doppio>[0]
+    >();
+  });
+
   test('accept every paper format documented by the API', () => {
     expectTypeOf<'Tabloid'>().toExtend<PageFormat>();
   });

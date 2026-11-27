@@ -52,13 +52,19 @@
     "test:coverage": "vitest run --project unit --coverage",
     "test:e2e": "vitest run --project e2e",
     "check:package": "tsdown && publint && attw --pack .",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "release": "changeset publish"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "author": "Renaud Lataguerra",
   "license": "MIT",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@biomejs/biome": "2.6.9",
+    "@changesets/cli": "^3.0.3",
     "@types/node": "^22.20.7",
     "@vitest/coverage-v8": "^5.1.2",
     "publint": "^0.3.25",
