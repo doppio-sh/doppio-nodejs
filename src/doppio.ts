@@ -61,8 +61,11 @@ export class Doppio {
   #doppioConfig: DoppioSection | undefined;
   #launchConfig: LaunchConfig | undefined;
 
-  /** @param apiKeyOrOptions - Your API key, or the full client options. */
-  constructor(apiKeyOrOptions: string | DoppioClientOptions) {
+  /**
+   * @param apiKeyOrOptions - Your API key, or the full client options.
+   * @throws {DoppioError} When the API key is missing.
+   */
+  constructor(apiKeyOrOptions: string | undefined | DoppioClientOptions) {
     const options: DoppioClientOptions =
       typeof apiKeyOrOptions === 'object' && apiKeyOrOptions !== null
         ? apiKeyOrOptions

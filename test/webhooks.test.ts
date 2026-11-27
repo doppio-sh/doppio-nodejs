@@ -62,6 +62,22 @@ describe('verifyWebhookSignature', () => {
     ).resolves.toBe(false);
   });
 
+  test.each([
+    ['empty', ''],
+    ['undefined', undefined],
+  ])('throws a DoppioError when the secret is %s', async (_label, secret) => {
+    const promise = verifyWebhookSignature({
+      payload: PAYLOAD,
+      signature: SIGNATURE,
+      secret,
+    });
+
+    await expect(promise).rejects.toBeInstanceOf(DoppioError);
+    await expect(promise).rejects.toThrow(
+      'You must set your Doppio.sh webhook secret'
+    );
+  });
+
   test('throws a DoppioError when the Web Crypto API is missing', async () => {
     vi.stubGlobal('crypto', undefined);
 
