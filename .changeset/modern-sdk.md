@@ -1,6 +1,6 @@
 ---
-
-## "doppio-nodejs": minor
+"doppio-nodejs": minor
+---
 
 Modernize the SDK. Existing calls keep working.
 

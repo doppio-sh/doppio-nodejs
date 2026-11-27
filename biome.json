@@ -9,5 +9,8 @@
       "quoteStyle": "single",
       "trailingCommas": "es5"
     }
+  },
+  "markdown": {
+    "parser": { "frontmatter": true }
   }
 }
