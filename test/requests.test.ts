@@ -218,6 +218,33 @@ describe.each(PAGE_METHODS)('$name call options', (method) => {
   });
 });
 
+describe.each(['renderPdfSync', 'renderScreenshotSync'] as const)(
+  '%s debug option',
+  (name) => {
+    test('adds debug: true to the body when set', async () => {
+      const fetchMock = stubFetch(() => successResponse('sync'));
+
+      await new Doppio(API_KEY)[name](
+        { setContent: { html: HTML } },
+        { debug: true }
+      );
+
+      expect(lastRequest(fetchMock).body).toEqual({
+        page: { setContent: { html: HTML } },
+        debug: true,
+      });
+    });
+
+    test('leaves debug out of the body by default', async () => {
+      const fetchMock = stubFetch(() => successResponse('sync'));
+
+      await new Doppio(API_KEY)[name]({ setContent: { html: HTML } });
+
+      expect(lastRequest(fetchMock).body).not.toHaveProperty('debug');
+    });
+  }
+);
+
 describe('client options', () => {
   test('sends the doppio and launch defaults passed to the constructor', async () => {
     const fetchMock = stubFetch(() => binaryResponse());

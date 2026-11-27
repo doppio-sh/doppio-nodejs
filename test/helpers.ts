@@ -208,7 +208,9 @@ export function lastRequest(fetchMock: Mock<typeof fetch>): {
   const lastCall = fetchMock.mock.lastCall;
   if (!lastCall) throw new Error('fetch was not called');
   const [url, init = {}] = lastCall;
-  return { url: String(url), init, body: JSON.parse(String(init.body)) };
+  const body =
+    init.body === undefined ? undefined : JSON.parse(String(init.body));
+  return { url: String(url), init, body };
 }
 
 export function readyClient(method: MethodCase): Doppio {
