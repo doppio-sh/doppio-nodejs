@@ -9,6 +9,10 @@ updates:
     commit-message:
       prefix: build
       include: scope
+    ignore:
+      # Must match the oldest supported Node.js major.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       dev-dependencies:
         dependency-type: development
