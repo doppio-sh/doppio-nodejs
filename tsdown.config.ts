@@ -7,7 +7,7 @@ export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm', 'cjs'],
   platform: 'neutral',
-  target: 'es2022',
+  target: 'es2023',
   fixedExtension: true,
   dts: true,
   sourcemap: true,

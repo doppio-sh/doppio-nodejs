@@ -35,7 +35,7 @@ export interface DoppioAsyncConfig extends DoppioConfig {
   webhook: {
     url: string;
     method: HttpMethodOption;
-    headers?: Record<string, any>;
+    headers?: Record<string, string>;
   };
 }
 
@@ -48,12 +48,6 @@ export interface LaunchConfig {
     hasTouch?: boolean;
     isLandscape?: boolean;
   };
-}
-
-/** @deprecated Internal type that is no longer used. Removed in 1.0. */
-export interface MergedConfigs {
-  doppio?: DoppioConfig | DoppioAsyncConfig;
-  launch?: LaunchConfig;
 }
 
 export interface SetContentConfig {
@@ -112,9 +106,9 @@ export interface CookiesConfig {
   path?: string;
   secure?: boolean;
   httpOnly?: boolean;
-  sameSite?: 'Strict' | 'Lax' | 'None' | (string & Record<never, never>);
+  sameSite?: 'Strict' | 'Lax' | 'None';
   /** Expiration date, in seconds since the Unix epoch. */
-  expires?: number | string;
+  expires?: number;
 }
 
 export interface LocalStorageConfig {
@@ -139,23 +133,20 @@ export interface WaitForSelectorConfig {
   };
 }
 
-export interface PagePdfConfig {
-  /** Page to render from a URL. Cannot be combined with `setContent`. */
-  goto?: GotoConfig;
-  /** Page to render from HTML. Cannot be combined with `goto`. */
-  setContent?: SetContentConfig;
+/** A page comes either from a URL (`goto`) or from HTML (`setContent`). */
+export type PageSource =
+  | { goto: GotoConfig; setContent?: never }
+  | { setContent: SetContentConfig; goto?: never };
+
+/** Options shared by PDF and screenshot renders. */
+export interface PageOptions {
   setJavaScriptEnabled?: boolean;
   /** CSS media type to emulate. `null` disables the emulation. */
-  emulateMediaType?:
-    | 'screen'
-    | 'print'
-    | null
-    | (string & Record<never, never>);
+  emulateMediaType?: 'screen' | 'print' | null;
   /** Timezone ID used by the page, such as `Europe/Paris`. */
   emulateTimezone?: string;
   setExtraHTTPHeaders?: Record<string, string>;
   authenticate?: AuthenticateConfig;
-  pdf?: PdfConfig;
   setCookies?: CookiesConfig[];
   setLocalStorageItems?: LocalStorageConfig[];
   waitForFunction?: WaitForFunctionConfig;
@@ -163,18 +154,26 @@ export interface PagePdfConfig {
   setUserAgent?: string;
 }
 
-export interface ScreenshotConfig {
-  captureBeyondViewport?: boolean;
-  clip?: ScreenshotClip;
-  fullPage?: boolean;
-  omitBackground?: boolean;
-  quality?: number;
-  type?: ScreenshotType;
-}
+export type PagePdfConfig = PageSource & PageOptions & { pdf?: PdfConfig };
 
-export interface PageScreenshotConfig extends Omit<PagePdfConfig, 'pdf'> {
-  screenshot?: ScreenshotConfig;
-}
+/** Captures either a region (`clip`) or the full page (`fullPage`). */
+export type ScreenshotArea =
+  | { clip?: ScreenshotClip; fullPage?: never }
+  | { fullPage?: boolean; clip?: never };
+
+/** `quality` only applies to the lossy formats. */
+export type ScreenshotFormat =
+  | { type?: 'png'; quality?: never }
+  | { type: Exclude<ScreenshotType, 'png'>; quality?: number };
+
+export type ScreenshotConfig = ScreenshotArea &
+  ScreenshotFormat & {
+    captureBeyondViewport?: boolean;
+    omitBackground?: boolean;
+  };
+
+export type PageScreenshotConfig = PageSource &
+  PageOptions & { screenshot?: ScreenshotConfig };
 
 export interface DoppioResponse {
   doppioRequestId: string;
@@ -249,8 +248,10 @@ export interface DoppioResponseAsync {
 
 export interface TemplateConfig {
   templateId: string;
-  templateData?: Record<any, any>;
-  doppio?: DoppioConfig;
+  /** Values injected in the `{* DOP_xxx *}` tags of the template. */
+  templateData?: Record<string, unknown>;
+  /** Merged over the client and call `doppio` configs. */
+  doppio?: DoppioConfig | DoppioAsyncConfig;
 }
 
 export interface DoppioClientOptions {
