@@ -16,7 +16,7 @@ The official TypeScript SDK for [Doppio](https://doppio.sh). Render PDFs and scr
 npm install doppio-nodejs
 ```
 
-Requires Node.js 18 or later. Node.js 22 or later is recommended, because older versions no longer get security updates.
+Requires Node.js 22 or later.
 
 ## Quick start
 
@@ -206,7 +206,23 @@ console.log(
 );
 ```
 
-## Upgrading from 0.9
+## Upgrading
+
+### From 0.10 to 1.0
+
+1.0 requires Node.js 22 or later, and its types reject invalid configs at compile time:
+
+- A page needs exactly one of `goto` and `setContent`.
+- A screenshot takes either `clip` or `fullPage`. `quality` requires `type` set to `jpg`, `jpeg` or `webp`.
+- `webhook.headers` only accepts string values.
+- `emulateMediaType`, `sameSite` and cookie `expires` only accept the values documented by the API.
+- `templateData` is a `Record<string, unknown>`. If TypeScript rejects data typed with an `interface`, declare it with a `type` alias instead.
+- `PagePdfConfig`, `PageScreenshotConfig` and `ScreenshotConfig` are now unions, which an `interface` cannot extend. Use an intersection type instead, such as `type MyPage = PagePdfConfig & { label: string }`.
+- `MergedConfigs` is removed.
+
+Code that compiled with 0.10 and sent valid requests keeps working at runtime.
+
+### From 0.9 to 0.10
 
 Existing calls keep working. Three behaviors changed:
 
