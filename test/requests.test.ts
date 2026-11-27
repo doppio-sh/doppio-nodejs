@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { Doppio } from '../src/index.js';
 import {
@@ -12,6 +12,7 @@ import {
   lastRequest,
   PAGE_METHODS,
   readyClient,
+  SDK_VERSION,
   SYNC_RESPONSE,
   stubFetch,
   successResponse,
@@ -32,7 +33,7 @@ describe.each(ALL_METHODS)('$name request', (method) => {
     expect(init.method).toBe('POST');
     expect(init.headers).toEqual({
       Authorization: `Bearer ${API_KEY}`,
-      'User-Agent': 'Doppio/0.0.1',
+      'User-Agent': `doppio-nodejs/${SDK_VERSION}`,
       'Content-Type': 'application/json',
     });
   });
@@ -129,19 +130,135 @@ describe.each(TEMPLATE_METHODS)('$name body', (method) => {
     });
   });
 
-  test('lets a template doppio config replace the client one entirely', async () => {
+  test('merges a template doppio config over the client one', async () => {
     const fetchMock = stubFetch(() => successResponse(method.output));
     const client = new Doppio(API_KEY);
     client.doppio({ webhook: WEBHOOK });
-    const presigned = { presignedUrl: 'https://bucket.example.com/doc.pdf' };
+    const presignedUrl = 'https://bucket.example.com/doc.pdf';
 
     await call(client, method.name, {
       ...method.validArg,
-      doppio: presigned,
+      doppio: { presignedUrl },
     });
 
-    expect(lastRequest(fetchMock).body).toMatchObject({ doppio: presigned });
-    expect(lastRequest(fetchMock).body).not.toHaveProperty('doppio.webhook');
+    expect(lastRequest(fetchMock).body).toHaveProperty('doppio', {
+      webhook: WEBHOOK,
+      presignedUrl,
+    });
+  });
+
+  test('gives the template doppio config precedence over the call options', async () => {
+    const fetchMock = stubFetch(() => successResponse(method.output));
+    const client = new Doppio({
+      apiKey: API_KEY,
+      doppio: { contentDisposition: 'inline' },
+    });
+
+    await call(
+      client,
+      method.name,
+      { ...method.validArg, doppio: { presignedUrl: 'https://b.example/t' } },
+      { doppio: { presignedUrl: 'https://b.example/options' } }
+    );
+
+    expect(lastRequest(fetchMock).body).toHaveProperty('doppio', {
+      contentDisposition: 'inline',
+      presignedUrl: 'https://b.example/t',
+    });
+  });
+});
+
+describe.each(PAGE_METHODS)('$name call options', (method) => {
+  test('merges the call doppio and launch configs over the client ones', async () => {
+    const fetchMock = stubFetch(() => successResponse(method.output));
+    const client = new Doppio({
+      apiKey: API_KEY,
+      doppio: { contentDisposition: 'inline', webhook: WEBHOOK },
+      launch: LAUNCH,
+    });
+
+    await call(client, method.name, method.validArg, {
+      doppio: {
+        contentDisposition: 'attachment',
+        presignedUrl: 'https://b.ex',
+      },
+      launch: { defaultViewport: { width: 800, deviceScaleFactor: 2 } },
+    });
+
+    expect(lastRequest(fetchMock).body).toEqual({
+      doppio: {
+        contentDisposition: 'attachment',
+        webhook: WEBHOOK,
+        presignedUrl: 'https://b.ex',
+      },
+      launch: {
+        defaultViewport: { width: 800, height: 720, deviceScaleFactor: 2 },
+      },
+      page: method.validArg,
+    });
+  });
+
+  test('does not keep the call options for later calls', async () => {
+    const fetchMock = stubFetch(() => successResponse(method.output));
+    const client = new Doppio({
+      apiKey: API_KEY,
+      doppio: { webhook: WEBHOOK },
+    });
+
+    await call(client, method.name, method.validArg, {
+      doppio: { presignedUrl: 'https://b.ex' },
+      launch: LAUNCH,
+    });
+    await call(client, method.name, method.validArg);
+
+    expect(lastRequest(fetchMock).body).toEqual({
+      doppio: { webhook: WEBHOOK },
+      page: method.validArg,
+    });
+  });
+});
+
+describe('client options', () => {
+  test('sends the doppio and launch defaults passed to the constructor', async () => {
+    const fetchMock = stubFetch(() => binaryResponse());
+    const client = new Doppio({
+      apiKey: API_KEY,
+      doppio: { contentDisposition: 'inline' },
+      launch: LAUNCH,
+    });
+
+    await client.renderPdfDirect({ setContent: { html: HTML } });
+
+    expect(lastRequest(fetchMock).body).toEqual({
+      doppio: { contentDisposition: 'inline' },
+      launch: LAUNCH,
+      page: { setContent: { html: HTML } },
+    });
+  });
+
+  test('sends requests to the configured base URL', async () => {
+    const fetchMock = stubFetch(() => binaryResponse());
+    const client = new Doppio({
+      apiKey: API_KEY,
+      baseUrl: 'https://staging.doppio.test/',
+    });
+
+    await client.renderPdfDirect({ setContent: { html: HTML } });
+
+    expect(lastRequest(fetchMock).url).toBe(
+      'https://staging.doppio.test/v1/render/pdf/direct'
+    );
+  });
+
+  test('uses the fetch passed to the constructor instead of the global one', async () => {
+    const globalFetch = stubFetch(() => binaryResponse());
+    const customFetch = vi.fn<typeof fetch>(async () => binaryResponse());
+    const client = new Doppio({ apiKey: API_KEY, fetch: customFetch });
+
+    await client.renderPdfDirect({ setContent: { html: HTML } });
+
+    expect(customFetch).toHaveBeenCalledOnce();
+    expect(globalFetch).not.toHaveBeenCalled();
   });
 });
 
