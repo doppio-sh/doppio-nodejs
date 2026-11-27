@@ -1,6 +1,6 @@
 ---
-
-## "doppio-nodejs": major
+"doppio-nodejs": major
+---
 
 First stable release. It requires Node.js 22 or later, and its types reject invalid configs at compile time:
 
