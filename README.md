@@ -217,6 +217,7 @@ console.log(
 - `webhook.headers` only accepts string values.
 - `emulateMediaType`, `sameSite` and cookie `expires` only accept the values documented by the API.
 - `templateData` is a `Record<string, unknown>`. If TypeScript rejects data typed with an `interface`, declare it with a `type` alias instead.
+- `PagePdfConfig`, `PageScreenshotConfig` and `ScreenshotConfig` are now unions, which an `interface` cannot extend. Use an intersection type instead, such as `type MyPage = PagePdfConfig & { label: string }`.
 - `MergedConfigs` is removed.
 
 Code that compiled with 0.10 and sent valid requests keeps working at runtime.
