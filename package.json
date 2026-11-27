@@ -53,11 +53,11 @@
     "test:e2e": "vitest run --project e2e",
     "check:package": "tsdown && publint && attw --pack .",
     "prepack": "npm run build",
-    "release": "changeset publish"
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run test:coverage && npm run check:package",
+    "release": "changeset publish && git push --follow-tags"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "author": "Renaud Lataguerra",
   "license": "MIT",

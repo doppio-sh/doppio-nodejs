@@ -35,4 +35,8 @@ The end-to-end tests read `DOPPIO_API_KEY`, `DOPPIO_TEMPLATE_ID` and `DOPPIO_WEB
 
 ## Releases
 
-Releases are automated. When changesets reach `master`, the release workflow opens a `chore: release` pull request that bumps the version and updates `CHANGELOG.md`. Merging it publishes the package to npm through [trusted publishing](https://docs.npmjs.com/trusted-publishers), with provenance, and creates the git tag and the GitHub release.
+A maintainer publishes releases from their machine:
+
+1. On an up-to-date `master`, run `npx changeset version`. It bumps the version, updates `CHANGELOG.md` and deletes the changesets it used. Then run `npm install --package-lock-only` to sync the lockfile, and merge the result through a `chore: release x.y.z` pull request.
+2. Optionally, run `npm run test:e2e` to render real documents with the new version.
+3. Back on an up-to-date `master`, run `npm run release`. It runs every check, builds, publishes to npm (your npm account asks for its second factor), and pushes the `vx.y.z` git tag.
